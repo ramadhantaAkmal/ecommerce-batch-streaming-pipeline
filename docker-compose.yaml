@@ -38,9 +38,9 @@ services:
       - airflow-net
     restart: always
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=raw_data
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "root"]
       interval: 5s
@@ -77,8 +77,8 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: admin
-      _AIRFLOW_WWW_USER_PASSWORD: admin
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD}
       _AIRFLOW_WWW_USER_FIRSTNAME: Airflow
       _AIRFLOW_WWW_USER_LASTNAME: Default
       _AIRFLOW_WWW_USER_EMAIL: admin@example.com

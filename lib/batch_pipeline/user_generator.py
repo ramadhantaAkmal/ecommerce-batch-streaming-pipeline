@@ -1,5 +1,8 @@
 from faker import Faker
 import random
+from utils.db_utils import connect_to_db, load_to_db
+from const.exceptions import DBConnectionError
+from const.const import DB_CONFIG
 
 fake = Faker('id_ID')
 emails = ["gmail", "outlook", "yahoo"]
@@ -21,12 +24,27 @@ def generate_user():
     email = random.choices(
         email_variant,
         weights=[50, 50], k=1)[0]
-    
-    print(full_name)
-    print(email)
+    user = {"name":full_name,"email":email}
+    return user
 
-i=1
+conn = connect_to_db(DB_CONFIG)
+if conn is None:
+    raise DBConnectionError("Postgress Connection Failed")
+else:
+    print("Generate User...")
+    user = generate_user()
+    load_to_db(
+        """
+            INSERT INTO users (name, email)
+            VALUES (%s, %s)
+        """,(user["name"],user["email"]),conn
+    )
+    print("Successfully generated user and load into db...")
 
-while i <= 10:
-    i+=1
-    generate_user()
+#FOR TESTING
+    # i=1
+
+    # while i <= 10:
+    #     i+=1
+    #     generate_user()
+

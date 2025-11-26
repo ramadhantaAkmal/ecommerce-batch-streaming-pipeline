@@ -22,6 +22,7 @@ x-airflow-common: &airflow-common
     - ./airflow/plugins:/opt/airflow/plugins
     - ./lib:/opt/airflow/lib
     - ./keys:/opt/airflow/keys
+    - ./tests:/opt/airflow/tests
   networks:
     - airflow-net
   depends_on:
@@ -30,7 +31,8 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 services:
-  postgres:
+  postgres-source:
+    container_name: postgres-source
     image: postgres:14
     ports:
       - 5434:5432
@@ -47,7 +49,7 @@ services:
       retries: 5
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-  airflow-postgres:
+  postgres:
     image: postgres:14
     container_name: airflow_postgres
     restart: always
@@ -77,10 +79,10 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USERNAME}
-      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD}
-      _AIRFLOW_WWW_USER_FIRSTNAME: Airflow
-      _AIRFLOW_WWW_USER_LASTNAME: Default
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      _AIRFLOW_WWW_USER_FIRSTNAME: Air
+      _AIRFLOW_WWW_USER_LASTNAME: Flow
       _AIRFLOW_WWW_USER_EMAIL: admin@example.com
       _AIRFLOW_WWW_USER_ROLE: Admin
       _PIP_ADDITIONAL_REQUIREMENTS: ''

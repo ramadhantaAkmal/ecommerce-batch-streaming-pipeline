@@ -1,3 +1,6 @@
 .env
 logs
 keys
+__pycache__
+dag_processor_manager
+airflow/logs/dag_processor_manager/dag_processor_manager.log

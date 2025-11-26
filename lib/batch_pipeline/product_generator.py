@@ -1,5 +1,8 @@
 from faker import Faker
 from faker.providers import BaseProvider
+from utils.db_utils import connect_to_db,load_to_db
+from const.exceptions import DBConnectionError
+from const.const import PRICE_RANGES,DB_CONFIG
 import random
 
 fake = Faker()
@@ -68,40 +71,7 @@ def premium_product_category():
     rand_index = random.randint(0, len(luxury_categories[category_type])-1)
     category_name = luxury_categories[category_type][rand_index]
     
-    return category_type, category_name
-    
-
-PRICE_RANGES = {
-        # Watches
-        "watch":            {"min": 4_500,   "max": 350_000,  "common": (8_000, 85_000)},
-        "chronograph":      {"min": 6_500,   "max": 450_000,  "common": (12_000, 120_000)},
-        "tourbillon":       {"min": 85_000,  "max": 2_500_000,"common": (150_000, 800_000)},
-
-        # Fragrances
-        "eau de parfum":    {"min": 180,     "max": 1_200,    "common": (250, 680)},
-        "parfum":           {"min": 280,     "max": 2_800,    "common": (380, 980)},
-        "extrait":          {"min": 450,     "max": 4_500,    "common": (680, 1_800)},
-
-        # Handbags & Leather Goods
-        "handbag":          {"min": 2_200,   "max": 85_000,   "common": (3_800, 28_000)},
-        "birkin":           {"min": 12_000,  "max": 500_000,  "common": (28_000, 120_000)},
-        "kelly":            {"min": 9_500,   "max": 380_000,  "common": (18_000, 85_000)},
-        "tote":             {"min": 1_800,   "max": 42_000,   "common": (2_900, 18_000)},
-
-        # Jewelry
-        "ring":             {"min": 3_800,   "max": 1_200_000,"common": (8_500, 125_000)},
-        "necklace":         {"min": 5_200,   "max": 2_800_000,"common": (12_000, 280_000)},
-        "earrings":         {"min": 2_900,   "max": 950_000,  "common": (6_800, 98_000)},
-
-        # Footwear
-        "sneaker":          {"min": 680,     "max": 18_000,   "common": (890, 4_200)},
-        "loafer":           {"min": 780,     "max": 6_800,    "common": (1_100, 3_200)},
-        
-        # Jackets & coats
-        "jacket":           {"min": 2_800,   "max": 48_000,   "common": (4_200, 18_000)},
-        "coat":             {"min": 3_900,   "max": 92_000,   "common": (6_500, 32_000)},
-}
-
+    return category_type, category_name    
     
 def luxury_price(category):
         """
@@ -138,11 +108,26 @@ def luxury_price(category):
 
         return price
 
-
 # ——— EXAMPLE USAGE ———
-print("Luxury Product Names with Realistic Prices\n" + "="*50)
-for _ in range(25):
+# print("Luxury Product Names with Realistic Prices\n" + "="*50)
+# for _ in range(25):
+#     product_name = premium_product_name()
+#     category_type, category_name = premium_product_category()
+#     price = luxury_price(category_name)
+#     print(f"{product_name:<35} {category_type:<25} {category_name:<25} ${price:,.0f}")
+
+conn = connect_to_db(DB_CONFIG)
+if conn is None:
+    raise DBConnectionError("Postgress Connection Failed")
+else:
+    print("Generate Product...")
     product_name = premium_product_name()
     category_type, category_name = premium_product_category()
     price = luxury_price(category_name)
-    print(f"{product_name:<35} {category_type:<25} {category_name:<25} ${price:,.0f}")
+    load_to_db(
+        """
+            INSERT INTO products (product_name, category, price)
+            VALUES (%s, %s, %s)
+        """,(product_name, category_type, price),conn
+    )
+    print("Successfully generated product and load into db...")

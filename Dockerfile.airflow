@@ -9,6 +9,5 @@ RUN pip install --no-cache-dir \
     apache-airflow-providers-google \
     sqlalchemy \
     psycopg2-binary \
-    pandas \
     dbt-core \
     dbt-bigquery

@@ -2,7 +2,7 @@ from faker import Faker
 import random
 from utils.db_utils import connect_to_db, load_to_db
 from const.exceptions import DBConnectionError
-from const.const import DB_CONFIG
+from const.config import DB_CONFIG
 
 fake = Faker('id_ID')
 emails = ["gmail", "outlook", "yahoo"]
@@ -40,6 +40,7 @@ else:
         """,(user["name"],user["email"]),conn
     )
     print("Successfully generated user and load into db...")
+conn.close()
 
 #FOR TESTING
     # i=1

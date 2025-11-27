@@ -2,7 +2,8 @@ from faker import Faker
 from faker.providers import BaseProvider
 from utils.db_utils import connect_to_db,load_to_db
 from const.exceptions import DBConnectionError
-from const.const import PRICE_RANGES,DB_CONFIG
+from const.const import PRICE_RANGES
+from const.config import DB_CONFIG
 import random
 
 fake = Faker()
@@ -131,3 +132,4 @@ else:
         """,(product_name, category_type, price),conn
     )
     print("Successfully generated product and load into db...")
+conn.close()

@@ -24,10 +24,3 @@ PRICE_RANGES = {
     "coat": {"min": 3_900_000, "max": 92_000_000, "common": (6_500_000, 32_000_000)},
 }
 
-DB_CONFIG = {
-    "host":"localhost",
-    "port":5434,
-    "name":"data_source",
-    "user":"root",
-    "password":"password"
-}

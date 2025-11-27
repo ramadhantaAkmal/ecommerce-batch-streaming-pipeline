@@ -1,35 +1,19 @@
-from google.cloud import pubsub_v1
 import json
-from datetime import datetime
 import psycopg2
+from google.cloud import pubsub_v1
+from datetime import datetime
 from psycopg2.extras import Json
-
-project_id = "jcdeah-006"
-subscription_id = "akmal-fraud-detection-topic-sub"
+from const.config import DB_CONFIG, PROJECT_ID, SUBSCRIPTION_ID
+from utils.db_utils import connect_to_db,load_to_db
 
 subscriber = pubsub_v1.SubscriberClient()
-subscription_path = subscriber.subscription_path(project_id, subscription_id)
-
-# conn = psycopg2.connect(host="localhost", database="streaming_db", user="postgres", password="yourpassword")
-# cur = conn.cursor()
-
-# cur.execute("""CREATE TABLE IF NOT EXISTS orders_enhanced (
-#     id SERIAL PRIMARY KEY,
-#     order_id VARCHAR(50) UNIQUE,
-#     data JSONB,
-#     status VARCHAR(20),
-#     fraud_reasons TEXT[],
-#     detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-# );""")
-# conn.commit()
+subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
 def is_fraud(order):
     reasons = []
     country = order["country"]
     qty = order["quantity"]
     amount = order["amount_numeric"]
-    dt = datetime.strptime(order["created_date"], "%Y-%m-%dT%H:%M:%S")
-    hour = dt.hour
     payment = order["payment"]
     device = order["device"]
 
@@ -41,15 +25,11 @@ def is_fraud(order):
     if payment["method"] in ["credit_card", "debit_card"] and payment["card_country"] != "ID" and country == "ID":
         reasons.append("foreign_card_in_id")
 
-    # Rule 3: Quantity besar (>100) di jam 00-04
-    if qty > 100 and 0 <= hour <= 4:
-        reasons.append("high_qty_midnight")
+    # Rule 3: Quantity besar (>100) dan amount lebih dari 100jt
+    if qty > 5 and amount > 100_000_000:
+        reasons.append("high_qty_on_exp_products")
 
-    # Rule 4: Amount > 100 juta di jam 00-04
-    if amount > 100_000_000 and 0 <= hour <= 4:
-        reasons.append("large_amount_midnight")
-
-    # Rule 5: Pakai VPN / Proxy
+    # Rule 4: Pakai VPN / Proxy
     if device["is_vpn"] or device["is_proxy"]:
         reasons.append("vpn_or_proxy")
 
@@ -57,6 +37,7 @@ def is_fraud(order):
 
 def callback(message):
     try:
+        conn = connect_to_db(DB_CONFIG)
         data = message.data.decode("utf-8")
         order = json.loads(data)
         order_id = order["order_id"]
@@ -66,18 +47,28 @@ def callback(message):
 
         order["status"] = status
         order["fraud_reasons"] = reasons if fraud_flag else ""
-        # cur.execute("""
-        #     INSERT INTO orders_enhanced (order_id, data, status, fraud_reasons)
-        #     VALUES (%s, %s, %s, %s)
-        #     ON CONFLICT (order_id) DO NOTHING
-        # """, (order_id, Json(order), status, reasons if fraud_flag else None))
-        # conn.commit()
 
         color = "\033[91m" if fraud_flag else "\033[92m"
         reason_str = ", ".join(reasons) if reasons else "genuine"
         print(f"{color}[{status.upper():7}] {order_id} | {reason_str}\033[0m")
-
+        
+        load_to_db(
+        """
+            INSERT INTO orders (order_id, user_id, product_id, quantity, amount, country_code, payment_method, status, fraud_reasons)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """,(order_id,
+             order["user_id"],
+             order["product_id"],
+             order["quantity"],
+             order["amount"], 
+             order["country"], 
+             order["payment"]["method"],
+             status,
+             reasons),conn
+        )
+        
         message.ack()
+        conn.close()
     except Exception as e:
         print("error:", e)
         message.nack()

@@ -59,19 +59,18 @@ def generate_payment():
 
 def generate_order(product: tuple, user: tuple):
     product_id, product_name, price = product
-    user_id = user[0]
+    user_id, created_at = user
+    platform = random.choice(["Android","IOS","Browser"], weights=[70,10,20])
     quantity = random.choices([1,2,3,5,10,50,100,200], weights=[60,20,10,5,3,1,0.8,0.2], k=1)[0]
     amount = price * quantity
     country = random.choice(["ID","SG","MY","US","GB","RU","CN","BR","NG","AE"] + ["ID"]*15)  # 60% dari ID
 
-    # Jam rawan fraud
-    if random.random() < 0.04:
-        hour = random.randint(0, 4)
-    else:
-        hour = random.randint(0, 23)
-
     created_dt = datetime.now() - timedelta(minutes=random.randint(0, 2880))
-    created_dt = created_dt.replace(hour=hour, minute=random.randint(0,59), second=random.randint(0,59))
+    now = datetime.now()
+    print(f"created_at: {created_at}")
+    print(f"now: {now}")
+    print(f"transform: {(now - created_at) * random.random()}")
+    print("-------------------------------")
 
     order = {
         "order_id": uuid.uuid4().hex[:5].upper(),
@@ -84,12 +83,10 @@ def generate_order(product: tuple, user: tuple):
         "country": country,
         "created_date": created_dt.strftime("%Y-%m-%dT%H:%M:%S"),
         "payment": generate_payment(),
-        "device": {
-            "ip_address": fake.ipv4(),
-            "user_agent": fake.user_agent(),
-            "is_vpn": random.random() < 0.07,
-            "is_proxy": random.random() < 0.04
-        }
+        "platform": platform,
+        "ip_address": fake.ipv4(),
+        "is_vpn": random.random() < 0.07,
+        "is_proxy": random.random() < 0.04
     }
     return order
 
@@ -97,17 +94,19 @@ conn = connect_to_db(DB_CONFIG)
 print("Generate Orders...")
 try:
     i = 1
-    while i<=20:
+    while i<=10:
         product_data = fetch_record("SELECT product_id, product_name, price FROM products ORDER BY RANDOM() LIMIT 1", conn)
-        user_data = fetch_record("SELECT user_id FROM users ORDER BY RANDOM() LIMIT 1", conn)
+        user_data = fetch_record("SELECT user_id,created_at FROM users ORDER BY RANDOM() LIMIT 1", conn)
         order = generate_order(product_data, user_data)
-        data = json.dumps(order, ensure_ascii=False).encode("utf-8")
-        future = publisher.publish(topic_path, data)
-        future.result()
-        print(f"[SENT] {order['order_id']} | {order['amount']:>16} | {order['country']} | "
-              f"{order['payment']['method']:12}")
+        # data = json.dumps(order, ensure_ascii=False).encode("utf-8")
+        # future = publisher.publish(topic_path, data)
+        # future.result()
+        # print(f"[SENT] {order['order_id']} | {order['amount']:>16} | {order['country']} | "
+        #       f"{order['payment']['method']:12}")
+        # print(order)
         time.sleep(random.uniform(0.7, 2.8))
         i+=1
+    conn.close()
 except KeyboardInterrupt:
     conn.close()
     print("\nGenerator Stopped")

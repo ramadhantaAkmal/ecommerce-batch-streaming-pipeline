@@ -54,15 +54,36 @@ def callback(message):
         
         load_to_db(
         """
-            INSERT INTO orders (order_id, user_id, product_id, quantity, amount, country_code, payment_method, status, fraud_reasons)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO orders 
+                (order_id, 
+                 user_id, 
+                 product_id, 
+                 quantity, 
+                 amount,
+                 amount_numeric, 
+                 country_code, 
+                 payment_method,
+                 card_brand,
+                 card_country,
+                 bank_code,
+                 ewallet_provider,
+                 billing_address,
+                 status, 
+                 fraud_reasons)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,(order_id,
              order["user_id"],
              order["product_id"],
              order["quantity"],
-             order["amount"], 
+             order["amount"],
+             order["amount_numeric"],
              order["country"], 
              order["payment"]["method"],
+             order["payment"]["card_brand"],
+             order["payment"]["card_country"],
+             order["payment"]["bank_code"],
+             order["payment"]["ewallet_provider"],
+             order["payment"]["billing_address"],
              status,
              reasons),conn
         )

@@ -1,0 +1,14 @@
+def get_field_type(dtype):
+    match dtype:
+        case 'object':
+            return 'STRING'
+        case 'int64':
+            return 'INTEGER'
+        case 'float64':
+            return 'FLOAT'
+        case 'datetime64[ns]':
+            return 'TIMESTAMP'
+        case 'bool':
+            return 'BOOLEAN'
+        case _:
+            return 'STRING'

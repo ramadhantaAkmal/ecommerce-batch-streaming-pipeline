@@ -1,6 +1,6 @@
 DB_CONFIG = {
-    "host":"localhost",
-    "port":5434,
+    "host":"postgres-source",
+    "port":5432,
     "name":"data_source",
     "user":"root",
     "password":"password"

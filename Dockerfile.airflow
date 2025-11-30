@@ -8,6 +8,7 @@ USER airflow
 RUN pip install --no-cache-dir \
     apache-airflow-providers-google \
     sqlalchemy \
+    faker \
     psycopg2-binary \
     dbt-core \
     dbt-bigquery

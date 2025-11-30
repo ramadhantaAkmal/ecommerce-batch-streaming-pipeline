@@ -1,9 +1,9 @@
 from faker import Faker
 from faker.providers import BaseProvider
-from utils.db_utils import connect_to_db,load_to_db
-from const.exceptions import DBConnectionError
-from const.const import PRICE_RANGES
-from const.config import DB_CONFIG
+from lib.batch_pipeline.utils.db_utils import connect_to_db,load_to_db
+from lib.batch_pipeline.const.exceptions import DBConnectionError
+from lib.batch_pipeline.const.const import PRICE_RANGES
+from lib.batch_pipeline.const.config import DB_CONFIG
 import random
 
 fake = Faker()
@@ -109,27 +109,20 @@ def luxury_price(category):
 
         return price
 
-# ——— EXAMPLE USAGE ———
-# print("Luxury Product Names with Realistic Prices\n" + "="*50)
-# for _ in range(25):
-#     product_name = premium_product_name()
-#     category_type, category_name = premium_product_category()
-#     price = luxury_price(category_name)
-#     print(f"{product_name:<35} {category_type:<25} {category_name:<25} ${price:,.0f}")
-
-conn = connect_to_db(DB_CONFIG)
-if conn is None:
-    raise DBConnectionError("Postgress Connection Failed")
-else:
-    print("Generate Product...")
-    product_name = premium_product_name()
-    category_type, category_name = premium_product_category()
-    price = luxury_price(category_name)
-    load_to_db(
-        """
-            INSERT INTO products (product_name, category, price)
-            VALUES (%s, %s, %s)
-        """,(product_name, category_type, price),conn
-    )
-    print("Successfully generated product and load into db...")
-conn.close()
+def generate_product(ts, **kwargs):
+    conn = connect_to_db(DB_CONFIG)
+    if conn is None:
+        raise DBConnectionError("Postgress Connection Failed")
+    else:
+        print("Generate Product...")
+        product_name = premium_product_name()
+        category_type, category_name = premium_product_category()
+        price = luxury_price(category_name)
+        load_to_db(
+            """
+                INSERT INTO products (product_name, category, price, created_at)
+                VALUES (%s, %s, %s, %s)
+            """,(product_name, category_type, price, ts),conn
+        )
+        print("Successfully generated product and load into db...")
+    conn.close()

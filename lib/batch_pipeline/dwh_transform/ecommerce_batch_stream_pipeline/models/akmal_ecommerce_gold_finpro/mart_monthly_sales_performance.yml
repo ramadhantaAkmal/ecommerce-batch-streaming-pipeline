@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: mart_monthly_sales_performance
+    description: |
+      Monthly aggregated sales & fraud performance.
+      Perfect for board decks, investor reports, and finance planning.
+      One row = one calendar month.
+
+    columns:
+      - name: order_month
+        description: "First day of the month (e.g., 2025-11-01)"
+        tests:
+          - unique
+          - not_null
+
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]
+      - name: month_name
+        description: "Full month name (January, February, etc.)"
+      - name: year_month_label
+        description: "Human-readable label like '2025-11'"
+
+      - name: total_orders
+        description: "All orders placed in the month"
+      - name: genuine_orders
+        description: "Real, non-fraudulent orders → actual sales"
+      - name: fraud_orders
+
+      - name: gross_gmv
+        description: "Sum of all order amounts before fraud filtering"
+      - name: net_revenue
+        description: "Only GENUINE orders → this is your real monthly revenue"
+      - name: genuine_units_sold
+
+      - name: aov_genuine
+        description: "Average Order Value of genuine orders"
+      - name: avg_items_per_genuine_order
+
+      - name: fraud_rate
+        description: "fraud_orders / total_orders"
+      - name: genuine_rate
+        description: "genuine_orders / total_orders (should + fraud_rate = 1)"
+
+      - name: net_revenue_previous_month
+        description: "Net revenue from the previous month (for MoM calculation)"
+      - name: mom_growth_rate
+        description: "Month-over-month revenue growth %"
+
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "genuine_rate + fraud_rate = 1 OR genuine_rate + fraud_rate BETWEEN 0.999 AND 1.001"
+      - dbt_utils.expression_is_true:
+          expression: "net_revenue <= gross_gmv"
+      - dbt_utils.expression_is_true:
+          expression: "COALESCE(mom_growth_rate, 0) BETWEEN -2 AND 10" 

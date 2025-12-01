@@ -1,0 +1,11 @@
+version: 2
+sources:
+  - name: akmal_ecommerce_silver_finpro
+    database: jcdeah-006
+    schema: akmal_ecommerce_silver_finpro
+    tables:
+      - name: dim_date
+      - name: dim_payment_method
+      - name: dim_products
+      - name: dim_users
+      - name: fact_order

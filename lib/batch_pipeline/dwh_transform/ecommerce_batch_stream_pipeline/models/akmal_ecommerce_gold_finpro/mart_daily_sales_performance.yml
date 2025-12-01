@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: mart_daily_sales_performance
+    description: |
+      Daily sales & fraud performance mart – adjusted for your real data where order status is only 'FRAUD' or 'GENUINE'.
+      This is the single source of truth for daily GMV, fraud rate, AOV, and operational KPIs.
+
+    columns:
+      - name: order_date
+        description: "Date of the orders"
+        tests:
+          - unique
+          - not_null
+
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]
+      - name: quarter
+        tests: [not_null]
+      - name: day_of_week
+      - name: day_of_week_number
+
+      - name: total_orders
+        description: "All orders placed (fraud + genuine)"
+
+      - name: genuine_orders
+        description: "Orders marked as GENUINE → these are the real sales"
+
+      - name: fraud_orders
+        description: "Orders marked as FRAUD"
+
+      - name: gross_gmv
+        description: "Sum of amount_numeric for all orders (before fraud filtering)"
+
+      - name: net_revenue
+        description: "Revenue that actually counts → only GENUINE orders"
+
+      - name: genuine_units_sold
+        description: "Total quantity from genuine orders"
+
+      - name: aov_genuine
+        description: "Average Order Value of genuine orders (most important AOV)"
+
+      - name: avg_items_per_genuine_order
+
+      - name: unique_genuine_customers
+        description: "Distinct customers who made at least one genuine purchase that day"
+
+      - name: fraud_rate
+        description: "fraud_orders / total_orders → key risk KPI"
+
+      - name: genuine_rate
+        description: "genuine_orders / total_orders → key success KPI"
+
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "fraud_rate BETWEEN 0 AND 1"
+      - dbt_utils.expression_is_true:
+          expression: "genuine_rate BETWEEN 0 AND 1"
+      - dbt_utils.expression_is_true:
+          expression: "genuine_rate + fraud_rate = 1" 
+      - dbt_utils.expression_is_true:
+          expression: "net_revenue <= gross_gmv"

@@ -1,0 +1,26 @@
+version: 2
+sources:
+  - name: akmal_ecommerce_bronze_finpro
+    database: jcdeah-006
+    schema: akmal_ecommerce_bronze_finpro
+    tables:
+      - name: products
+      - name: users
+      - name: orders
+
+models:
+  - name: dim_users
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+  - name: dim_products
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+  - name: fact_order
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [order_id]
+    columns:
+      - name: order_id
+        tests: [not_null]

@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: mart_fraud_by_product
+    description: |
+      Monthly ranking of products most targeted by fraudsters.
+      Shows fraud rate, fraud volume, and blocked fraud amount per product.
+      Essential for Risk, Trust & Safety, and Merchandising teams.
+
+    columns:
+      - name: order_month
+        description: "First day of the month"
+        tests:
+          - not_null
+
+      - name: year
+      - name: month
+      - name: year_month
+
+      - name: product_id
+        tests: [not_null]
+      - name: product_name
+        tests: [not_null]
+      - name: category
+
+      - name: total_orders
+        description: "Total times this product was ordered (min 10 to appear)"
+      - name: genuine_orders
+      - name: fraud_orders
+        description: "How many fraud attempts on this exact product"
+
+      - name: gross_gmv
+      - name: net_revenue
+
+      - name: fraud_rate
+        description: "Critical KPI: % of orders for this product that are fraudulent"
+      
+      - name: avg_fraud_order_value
+        description: "Average ticket size of fraud attempts – fraudsters often go for expensive items"
+
+      - name: blocked_fraud_amount
+        description: "Total monetary value of fraud orders blocked (if you decline them)"
+
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "fraud_rate BETWEEN 0 AND 1"
+      - dbt_utils.expression_is_true:
+          expression: "fraud_orders >= 1"
+      - dbt_utils.expression_is_true:
+          expression: "total_orders >= 10"

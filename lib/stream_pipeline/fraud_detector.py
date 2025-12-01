@@ -15,7 +15,6 @@ def is_fraud(order):
     qty = order["quantity"]
     amount = order["amount_numeric"]
     payment = order["payment"]
-    device = order["device"]
 
     # Rule 1: Transaksi dari luar Indonesia
     if country != "ID":
@@ -30,7 +29,7 @@ def is_fraud(order):
         reasons.append("high_qty_on_exp_products")
 
     # Rule 4: Pakai VPN / Proxy
-    if device["is_vpn"] or device["is_proxy"]:
+    if order["is_vpn"] or order["is_proxy"]:
         reasons.append("vpn_or_proxy")
 
     return len(reasons) > 0, reasons
@@ -69,8 +68,9 @@ def callback(message):
                  ewallet_provider,
                  billing_address,
                  status, 
-                 fraud_reasons)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 fraud_reasons,
+                 created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,(order_id,
              order["user_id"],
              order["product_id"],
@@ -85,7 +85,8 @@ def callback(message):
              order["payment"]["ewallet_provider"],
              order["payment"]["billing_address"],
              status,
-             reasons),conn
+             reasons,
+             order["created_date"]),conn
         )
         
         message.ack()

@@ -10,6 +10,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from pendulum import duration
 from lib.batch_pipeline.product_generator import generate_product
+from utils.discord_notifier import send_alert_discord
 
 with DAG(
     dag_id='product_generator',
@@ -19,11 +20,12 @@ with DAG(
     description='product data generator and load to postgres db',
     tags=['data-loader','hourly'],
     default_args={"retries":1},
-    dagrun_timeout=duration(minutes=10)
+    dagrun_timeout=duration(minutes=10),
+    on_failure_callback=send_alert_discord
 )as dag:
     generate_product_task = PythonOperator(
         task_id='load_product',
         python_callable=generate_product,
         op_kwargs={'ts': '{{ ts }}'},
-        provide_context=True
+        on_failure_callback=send_alert_discord
     )

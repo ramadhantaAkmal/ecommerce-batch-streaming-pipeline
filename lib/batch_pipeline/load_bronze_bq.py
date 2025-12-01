@@ -22,7 +22,7 @@ def extract_source_data(filter_date):
 
 def load_to_bigquery(**kwargs):
     # Take data from XCom
-    execution_date = kwargs['execution_date']
+    execution_date = kwargs['logical_date']
     filter_date = (execution_date - timedelta(days=1)).date()
     data = extract_source_data(filter_date)
     
@@ -76,9 +76,27 @@ def load_to_bigquery(**kwargs):
         insert_clause = f"INSERT ({columns}) VALUES ({', '.join([f'S.{col}' for col in df.columns])})"
         
         # For true upsert (merge), run query merge post-load
+        
+        # merge_query = f"""
+        #     MERGE `{table_id}` T
+        #     USING (SELECT {columns} FROM `{table_id}` WHERE DATE(created_at) = '{filter_date}') S
+        #     ON T.{primary_keys} = S.{primary_keys}
+        #     WHEN MATCHED THEN
+        #         UPDATE SET {update_columns}
+        #     WHEN NOT MATCHED THEN
+        #         {insert_clause}
+        # """
         merge_query = f"""
             MERGE `{table_id}` T
-            USING (SELECT {columns} FROM `{table_id}` WHERE DATE(created_at) = '{filter_date}') S
+            USING (
+                SELECT * FROM (
+                    SELECT *,
+                        ROW_NUMBER() OVER (PARTITION BY {primary_keys} ORDER BY created_at DESC) rn
+                    FROM `{table_id}`
+                    WHERE DATE(created_at) = '{filter_date}'
+                )
+                WHERE rn = 1
+            ) S
             ON T.{primary_keys} = S.{primary_keys}
             WHEN MATCHED THEN
                 UPDATE SET {update_columns}

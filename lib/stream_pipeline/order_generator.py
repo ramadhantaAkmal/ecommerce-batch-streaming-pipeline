@@ -83,16 +83,15 @@ conn = connect_to_db(DB_CONFIG)
 print("Generate Orders...")
 try:
     i = 1
-    while i<=3:
+    while i<=50:
         product_data = fetch_record("SELECT product_id, product_name, price FROM products ORDER BY RANDOM() LIMIT 1", conn)
         user_data = fetch_record("SELECT user_id,created_at FROM users ORDER BY RANDOM() LIMIT 1", conn)
         order = generate_order(product_data, user_data)
-        # data = json.dumps(order, ensure_ascii=False).encode("utf-8")
-        # future = publisher.publish(topic_path, data)
-        # future.result()
-        # print(f"[SENT] {order['order_id']} | {order['amount']:>16} | {order['country']} | "
-        #       f"{order['payment']['method']:12}")
-        print(order)
+        data = json.dumps(order, ensure_ascii=False).encode("utf-8")
+        future = publisher.publish(topic_path, data)
+        future.result()
+        print(f"[SENT] {order['order_id']} | {order['amount']:>16} | {order['country']} | "
+              f"{order['payment']['method']:12}")
         time.sleep(random.uniform(0.7, 2.8))
         i+=1
     conn.close()

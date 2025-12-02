@@ -24,31 +24,32 @@ The end result is transformed data stored in a data warehouse built on BigQuery 
 ## Archictecture
 ```mermaid
     flowchart TD
-        Products[Products Data]
-        Users[Users Data]
-        Orders[Orders Data]
-        Stream[Stream\n(Pub/Sub)]
-        FraudSys[Fraud\nDetector]
-        DB[Database\n(Postgres)]
-        BatchHourly[Airflow\n(Hourly Schedule)]
-        BatchDaily[Airflow\n(Daily Schedule)]
-        DWHBronze[BigQuery\nData Warehouse\nBronze Layer]
-        DWHSilver[BigQuery\nData Warehouse\nSilver Layer]
-        DWHGold[BigQuery\nData Warehouse\nGold Layer]
-        DBT[Dbt]
+      Products[Products Data]
+      Users[Users Data]
+      Orders[Orders Data]
+      Stream["Stream\n(Pub/Sub)"]
+      FraudSys[Fraud\nDetector]
+      DB[Database\n(Postgres)]
+      BatchHourly[Airflow\n(Hourly Schedule)]
+      BatchDaily[Airflow\n(Daily Schedule)]
+      DWHBronze[BigQuery\nData Warehouse\nBronze Layer]
+      DWHSilver[BigQuery\nData Warehouse\nSilver Layer]
+      DWHGold[BigQuery\nData Warehouse\nGold Layer]
+      DBT[Dbt]
 
-        Products --> BatchHourly
-        Users --> BatchHourly
-        Orders --> Stream
-        Stream --> FraudSys
-        BatchHourly --> DB
-        DB -->|Fetch Random\nProduct & User Id| Orders
-        FraudSys --> |Detect genuine or fraud orders| DB
-        DB --> Batch Daily
-        Batch Daily --> DWHBronze
-        DWHBronze --> DBT
-        DBT --> DWHSilver
-        DBT --> DWHGold
+      Products --> BatchHourly
+      Users --> BatchHourly
+      Orders --> Stream
+      Stream --> FraudSys
+      BatchHourly --> DB
+      DB -->|Fetch Random\nProduct & User Id| Orders
+      FraudSys --> |Detect genuine or fraud orders| DB
+      DB --> BatchDaily
+      BatchDaily --> DWHBronze
+      DWHBronze --> DBT
+      DBT --> DWHSilver
+      DBT --> DWHGold
+
 ```
 
 ## Setup Instructions

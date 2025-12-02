@@ -19,8 +19,6 @@ with DAG(
     catchup=True,
     description='user data generator and load to postgres db',
     tags=['data-loader','hourly'],
-    default_args={"retries":1},
-    dagrun_timeout=duration(minutes=10),
     on_failure_callback=send_alert_discord
 )as dag:
     generate_user_task = PythonOperator(

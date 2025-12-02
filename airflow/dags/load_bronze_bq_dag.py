@@ -21,7 +21,7 @@ with DAG(
     description='preparation/raw data load to bigquery',
     tags=['bq-loader','daily'],
     default_args={"retries":1},
-    dagrun_timeout=duration(minutes=10),
+    dagrun_timeout=duration(minutes=5),
     on_failure_callback=send_alert_discord
 )as dag:
     load_bronze_bq = PythonOperator(

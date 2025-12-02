@@ -21,7 +21,7 @@ The end result is transformed data stored in a data warehouse built on BigQuery 
 - Silver/Refined (Star Schema) layer
 - Gold/Data Mart layer
 
-## Archictecture
+## Architecture
 ```mermaid
     flowchart TD
       Products[Products Data]

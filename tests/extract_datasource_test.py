@@ -18,7 +18,9 @@ def get_field_type(dtype):
             return 'STRING'
 
 def extract_all_tables(**kwargs):
-    
+    """
+        Postgres database connection tester
+    """
     pg_hook = PostgresHook(postgres_conn_id='postgres_hook')
     tables = ['users', 'products','orders']  
     data = {}

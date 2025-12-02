@@ -4,6 +4,9 @@ import os
 
 KEY_PATH = "../keys/jcdeah-006-e1b616f9939c.json"
 
+#Tester for service acount bigquery connectione
+#To see if service account have bigquery permission
+
 credentials = service_account.Credentials.from_service_account_file(
     KEY_PATH,
     scopes=["https://www.googleapis.com/auth/cloud-platform"],

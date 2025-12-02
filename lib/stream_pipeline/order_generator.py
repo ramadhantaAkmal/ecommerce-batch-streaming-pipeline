@@ -16,6 +16,13 @@ publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
 
 def generate_payment():
+    """
+        Generate a random payment method dictionary simulating real-world payment distributions 
+        commonly seen in Indonesian e-commerce transactions.
+
+        This function is typically used for generating realistic fake payment data in testing, 
+        demo applications, or dataset creation
+    """
     method = random.choices(
         PAYMENT_METHODS,
         weights=[50, 20, 25, 5], k=1)[0]
@@ -53,6 +60,12 @@ def generate_payment():
         }
 
 def generate_order(product: tuple, user: tuple):
+    """
+        Generate a realistic synthetic e-commerce order for testing, demo, or fraud simulation purposes.
+        
+        This function creates a complete order record with realistic distributions commonly observed 
+        in Indonesian and Southeast Asian online marketplaces.
+    """
     product_id, product_name, price = product
     user_id, created_at = user
     platform = random.choices(["Android","IOS","Browser"], weights=[50,20,30], k=1)

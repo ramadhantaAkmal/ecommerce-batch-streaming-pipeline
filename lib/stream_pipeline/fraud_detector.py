@@ -10,6 +10,9 @@ subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
 def is_fraud(order):
+    """
+     Function for checking if Order is fraud or genuine
+    """
     reasons = []
     country = order["country"]
     qty = order["quantity"]
@@ -35,6 +38,9 @@ def is_fraud(order):
     return len(reasons) > 0, reasons
 
 def callback(message):
+    """
+     Callback function to get message data from publisher
+    """
     try:
         conn = connect_to_db(DB_CONFIG)
         data = message.data.decode("utf-8")

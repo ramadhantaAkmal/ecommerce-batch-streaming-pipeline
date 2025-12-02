@@ -8,6 +8,12 @@ fake = Faker('id_ID')
 emails = ["gmail", "outlook", "yahoo"]
 
 def generate_user():
+    """
+        Generate realistic user data.
+        It generates near realistic Indonesian names and 2 email patterns 
+        "firstname_lastname@example.com" and "lastname(random_number)@example.com"
+    """
+    
     #generate user name
     mail = random.choices(
         emails,
@@ -28,6 +34,9 @@ def generate_user():
     return user
 
 def generate_users(ts, **kwargs):
+    """
+        The main function for generate product data
+    """
     conn = connect_to_db(DB_CONFIG)
     if conn is None:
         raise DBConnectionError("Postgress Connection Failed")

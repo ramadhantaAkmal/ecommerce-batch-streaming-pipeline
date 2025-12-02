@@ -5,7 +5,12 @@ from datetime import datetime, timedelta
 from lib.batch_pipeline.utils.bq_utils import get_field_type
 
 def extract_source_data(filter_date):
-    
+    """
+        Extract raw data from source PostgreSQL tables for a specific date.
+
+        This function is used in ETL/data warehousing pipelines to pull daily incremental 
+        data from source databases.
+    """
     pg_hook = PostgresHook(postgres_conn_id='postgres_hook')
     tables = ['users', 'products','orders']  
     data = {}
@@ -26,7 +31,15 @@ def extract_source_data(filter_date):
     return data
 
 def load_to_bigquery(**kwargs):
-    # Take data from XCom
+    """
+        Function to extract daily incremental data from PostgreSQL 
+        and load it into Google BigQuery (Bronze layer) with deduplication.
+
+        This function is designed to run daily in an Airflow DAG. It:
+        1. Pulls data created on the previous day (execution_date - 1)
+        2. Loads into partitioned BigQuery tables (by `created_at` DATE)
+        3. Performs upsert (MERGE) logic to handle duplicates and late-arriving data
+    """
     execution_date = kwargs['logical_date']
     filter_date = (execution_date - timedelta(days=1)).date()
     data = extract_source_data(filter_date)
@@ -79,18 +92,7 @@ def load_to_bigquery(**kwargs):
         columns = ', '.join(df.columns)
         update_columns = ', '.join([f'T.{col} = S.{col}' for col in df.columns if col != primary_keys])
         insert_clause = f"INSERT ({columns}) VALUES ({', '.join([f'S.{col}' for col in df.columns])})"
-        
-        # For true upsert (merge), run query merge post-load
-        
-        # merge_query = f"""
-        #     MERGE `{table_id}` T
-        #     USING (SELECT {columns} FROM `{table_id}` WHERE DATE(created_at) = '{filter_date}') S
-        #     ON T.{primary_keys} = S.{primary_keys}
-        #     WHEN MATCHED THEN
-        #         UPDATE SET {update_columns}
-        #     WHEN NOT MATCHED THEN
-        #         {insert_clause}
-        # """
+
         merge_query = f"""
             MERGE `{table_id}` T
             USING (
@@ -108,5 +110,5 @@ def load_to_bigquery(**kwargs):
             WHEN NOT MATCHED THEN
                 {insert_clause}
         """
-        client.query(merge_query).result()  # run merge for incremental
+        client.query(merge_query).result()  
        

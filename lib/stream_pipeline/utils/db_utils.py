@@ -15,11 +15,13 @@ def connect_to_db(db_config):
         return None
 
 def load_to_db(query: str,data: tuple, conn):
+    """Load data into PostgreSQL database."""
     with conn.cursor() as curs:
         curs.execute(query,data)
     conn.commit()
     
 def fetch_record(query: str, conn):
+    """Fetch data from PostgreSQL database."""
     with conn.cursor() as cur:
         cur.execute(query)
         random_data = cur.fetchone()

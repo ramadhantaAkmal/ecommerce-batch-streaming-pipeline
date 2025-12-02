@@ -2,7 +2,7 @@ from faker import Faker
 from faker.providers import BaseProvider
 from lib.batch_pipeline.utils.db_utils import connect_to_db,load_to_db
 from lib.batch_pipeline.const.exceptions import DBConnectionError
-from lib.batch_pipeline.const.const import PRICE_RANGES
+from lib.batch_pipeline.const.const import PRICE_RANGES,ADJECTIVES,BRANDS_STYLE,CATEGORIES,MATERIALS,LUXURY_CATEGORIES
 from lib.batch_pipeline.const.config import DB_CONFIG
 import random
 
@@ -10,67 +10,37 @@ fake = Faker()
 
 # Custom Provider for Premium Product Names
 def premium_product_name():
-        # Luxury adjectives
-        adjectives = [
-            "Elite", "Signature", "Imperial", "Royal", "Prestige", "Heritage",
-            "Luxe", "Opulent", "Exquisite", "Refined", "Divine", "Celestial",
-            "Eternal", "Velvet", "Obsidian", "Aurum", "Platinum", "Diamond",
-            "Sovereign", "Regal", "Noble", "Grand", "Premier", "Infinite",
-            "Apex", "Zenith", "Vantage", "Pinnacle", "Ascendant", "Elysian"
-        ]
-
-        # High-end materials & themes
-        materials = [
-            "Cashmere", "Silk", "Leather", "Marble", "Ebony", "Ivory",
-            "Sapphire", "Emerald", "Onyx", "Titanium", "Carbon", "Gold",
-            "Rosewood", "Mahogany", "Alcantara", "Crystal", "Pearl", "Quartz"
-        ]
-
-        # Product categories (luxury style)
-        categories = [
-            "Couture", "Reserve", "Collection",
-            "Atelier", "Maison", "Heritage", "Legacy", "Edition", "Noir",
-            "Blanche", "Voyage", "Essence", "Absolu", "Intense", "Prive",
-            "Lumiere", "Infini", "Eclat", "Sublime", "Exceptionnelle", "Rare"
-        ]
-
-        # Luxury brand-inspired prefixes/suffixes
-        brands_style = [
-            "La Maison", "Atelier", "Cuir", "Joallier", "Horloger",
-            "Cuvée", "Domaine", "Château", "Vintage", "Millésime", "Privée",
-            "Exclusif", "Iconique", "Legend", "Mythique", "Édition Limitée"
-        ]
-
+        """
+            Generate a realistic product names.
+            The name patterns are generated randomly
+        """
         # Patterns for premium product names
         patterns = [
-            lambda: f"{random.choice(adjectives)} {random.choice(categories)}",
-            lambda: f"{random.choice(adjectives)} {random.choice(materials)} {random.choice(categories)}",
-            lambda: f"{random.choice(brands_style)} {random.choice(adjectives)}",
-            lambda: f"{random.choice(adjectives)} {random.choice(categories)} by {fake.last_name()}",
-            lambda: f"{random.choice(materials)} {random.choice(categories)}",
-            lambda: f"{random.choice(adjectives)} {random.choice(categories)} No. {random.randint(1, 99)}",
+            lambda: f"{random.choice(ADJECTIVES)} {random.choice(CATEGORIES)}",
+            lambda: f"{random.choice(ADJECTIVES)} {random.choice(MATERIALS)} {random.choice(CATEGORIES)}",
+            lambda: f"{random.choice(BRANDS_STYLE)} {random.choice(ADJECTIVES)}",
+            lambda: f"{random.choice(ADJECTIVES)} {random.choice(CATEGORIES)} by {fake.last_name()}",
+            lambda: f"{random.choice(MATERIALS)} {random.choice(CATEGORIES)}",
+            lambda: f"{random.choice(ADJECTIVES)} {random.choice(CATEGORIES)} No. {random.randint(1, 99)}",
             lambda: f"{fake.company()} {random.choice(['Couture', 'Privée', 'Reserve', 'Legacy'])}",
-            lambda: f"Édition {random.choice(adjectives)} – {random.choice(categories)}",
-            lambda: f"{random.choice(adjectives)} {random.choice(materials)} Edition",
-            lambda: f"{random.choice(brands_style)} {random.choice(['de', 'du', 'des'])} {fake.city()}",
+            lambda: f"Édition {random.choice(ADJECTIVES)} – {random.choice(CATEGORIES)}",
+            lambda: f"{random.choice(ADJECTIVES)} {random.choice(MATERIALS)} Edition",
+            lambda: f"{random.choice(BRANDS_STYLE)} {random.choice(['de', 'du', 'des'])} {fake.city()}",
         ]
 
         return random.choice(patterns)()
 
 def premium_product_category():
-    # Product categories
-    luxury_categories = {
-        "Watches": ["watch", "chronograph", "tourbillon"],
-        "Fragrances": ["eau de parfum", "parfum", "extrait"],
-        "Handbags & Leather Goods": ["handbag", "birkin", "kelly", "tote"],
-        "Jewelry": ["ring", "necklace", "earrings"],
-        "Footwear": ["sneaker", "loafer"],
-        "Jackets & Coats": ["jacket", "coat"]
-    }
-    category_type = random.choice(list(luxury_categories.keys()))
+    """
+        Generate a realistic luxury categories.
+        Randomly pick category types and category name
+    """
+    #Randomly pick category types
+    category_type = random.choice(list(LUXURY_CATEGORIES.keys()))
     
-    rand_index = random.randint(0, len(luxury_categories[category_type])-1)
-    category_name = luxury_categories[category_type][rand_index]
+    #Randomly pick category names
+    rand_index = random.randint(0, len(LUXURY_CATEGORIES[category_type])-1)
+    category_name = LUXURY_CATEGORIES[category_type][rand_index]
     
     return category_type, category_name    
     
@@ -94,7 +64,8 @@ def luxury_price(category):
             min_p = price_data["min"]
             max_p = price_data["max"]
 
-        # Skew towards higher end using a power-law-like distribution
+        # Generate a random price using a triangular distribution.
+        # The mode is set to 75% of the max value, making the result skew toward higher prices.
         price = int(random.triangular(min_p, max_p, max_p * 0.75))
         
         # Round to realistic luxury pricing patterns
@@ -110,6 +81,9 @@ def luxury_price(category):
         return price
 
 def generate_product(ts, **kwargs):
+    """
+        The main function for generate product data
+    """
     conn = connect_to_db(DB_CONFIG)
     if conn is None:
         raise DBConnectionError("Postgress Connection Failed")

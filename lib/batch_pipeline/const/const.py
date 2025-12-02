@@ -24,3 +24,45 @@ PRICE_RANGES = {
     "coat": {"min": 3_900_000, "max": 92_000_000, "common": (6_500_000, 32_000_000)},
 }
 
+# PRODUCT NAMES
+# Luxury adjectives
+ADJECTIVES = [
+            "Elite", "Signature", "Imperial", "Royal", "Prestige", "Heritage",
+            "Luxe", "Opulent", "Exquisite", "Refined", "Divine", "Celestial",
+            "Eternal", "Velvet", "Obsidian", "Aurum", "Platinum", "Diamond",
+            "Sovereign", "Regal", "Noble", "Grand", "Premier", "Infinite",
+            "Apex", "Zenith", "Vantage", "Pinnacle", "Ascendant", "Elysian"
+        ]
+
+# High-end materials & themes
+MATERIALS = [
+    "Cashmere", "Silk", "Leather", "Marble", "Ebony", "Ivory",
+    "Sapphire", "Emerald", "Onyx", "Titanium", "Carbon", "Gold",
+    "Rosewood", "Mahogany", "Alcantara", "Crystal", "Pearl", "Quartz"
+]
+
+# Product categories (luxury style)
+CATEGORIES = [
+    "Couture", "Reserve", "Collection",
+    "Atelier", "Maison", "Heritage", "Legacy", "Edition", "Noir",
+    "Blanche", "Voyage", "Essence", "Absolu", "Intense", "Prive",
+    "Lumiere", "Infini", "Eclat", "Sublime", "Exceptionnelle", "Rare"
+]
+
+# Luxury brand-inspired prefixes/suffixes
+BRANDS_STYLE = [
+    "La Maison", "Atelier", "Cuir", "Joallier", "Horloger",
+    "Cuvée", "Domaine", "Château", "Vintage", "Millésime", "Privée",
+    "Exclusif", "Iconique", "Legend", "Mythique", "Édition Limitée"
+]
+
+#PRODUCT CATEGORIES
+# Product categories
+LUXURY_CATEGORIES = {
+    "Watches": ["watch", "chronograph", "tourbillon"],
+    "Fragrances": ["eau de parfum", "parfum", "extrait"],
+    "Handbags & Leather Goods": ["handbag", "birkin", "kelly", "tote"],
+    "Jewelry": ["ring", "necklace", "earrings"],
+    "Footwear": ["sneaker", "loafer"],
+    "Jackets & Coats": ["jacket", "coat"]
+}

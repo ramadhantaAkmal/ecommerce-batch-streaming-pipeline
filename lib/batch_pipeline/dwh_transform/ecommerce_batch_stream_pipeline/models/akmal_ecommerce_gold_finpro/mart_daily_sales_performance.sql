@@ -43,49 +43,35 @@ SELECT
     EXTRACT(DAYOFWEEK FROM d.order_date) AS day_of_week_number,  -- 1=Sun, 7=Sat
 
     -- Core counts
-    COUNT(DISTINCT f.order_id)                                      AS total_orders,
-
-    COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END) 
-        AS genuine_orders,
-    COUNT(DISTINCT CASE WHEN f.status = 'frauds'   THEN f.order_id END) 
-        AS fraud_orders,
+    COUNT(DISTINCT f.order_id) AS total_orders,
+    COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END) AS genuine_orders,
+    COUNT(DISTINCT CASE WHEN f.status = 'frauds'   THEN f.order_id END) AS fraud_orders,
 
     -- Revenue & GMV
-    SUM(f.amount_numeric)                                           AS gross_gmv,
-
-    SUM(CASE WHEN f.status = 'genuine' THEN f.amount_numeric ELSE 0 END) 
-        AS net_revenue,   -- only genuine orders count as revenue
-
-    SUM(CASE WHEN f.status = 'genuine' THEN f.quantity ELSE 0 END) 
-        AS genuine_units_sold,
+    SUM(f.amount_numeric) AS gross_gmv,
+    SUM(CASE WHEN f.status = 'genuine' THEN f.amount_numeric ELSE 0 END) AS net_revenue,   -- only genuine orders count as revenue
+    SUM(CASE WHEN f.status = 'genuine' THEN f.quantity ELSE 0 END) AS genuine_units_sold,
 
     -- Key ratios
     SAFE_DIVIDE(
         SUM(CASE WHEN f.status = 'genuine' THEN f.amount_numeric ELSE 0 END),
-        COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END)
-    )                                                               AS aov_genuine,
+        COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END)) AS aov_genuine,
 
     SAFE_DIVIDE(SUM(CASE WHEN f.status = 'genuine' THEN f.quantity ELSE 0 END),
-                COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END))
-                                                                    AS avg_items_per_genuine_order,
-
-    -- Customer reach (only genuine buyers)
-    COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.user_id END) 
-        AS unique_genuine_customers,
+                COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END)) AS avg_items_per_genuine_order,
 
     -- Fraud metrics
     SAFE_DIVIDE(
         COUNT(DISTINCT CASE WHEN f.status = 'frauds' THEN f.order_id END),
         COUNT(DISTINCT f.order_id)
-    )                                                               AS fraud_rate,
+    ) AS fraud_rate,
 
     -- Success rate
     SAFE_DIVIDE(
         COUNT(DISTINCT CASE WHEN f.status = 'genuine' THEN f.order_id END),
         COUNT(DISTINCT f.order_id)
-    )                                                               AS genuine_rate
+    ) AS genuine_rate
 
 FROM fact f
 LEFT JOIN date_dim d USING (date_id)
 GROUP BY ALL
-ORDER BY order_date DESC

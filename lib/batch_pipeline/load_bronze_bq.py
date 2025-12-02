@@ -11,10 +11,15 @@ def extract_source_data(filter_date):
     data = {}
     
     for table in tables:
-        query = f"""
-            SELECT * FROM {table}
-            WHERE DATE(created_at) = '{filter_date}'
-        """
+        if table != "orders":
+            query = f"""
+                SELECT * FROM {table}
+                WHERE DATE(created_at) = '{filter_date}'
+            """
+        else:
+            query = f"""
+                SELECT * FROM {table}
+            """
         df = pg_hook.get_pandas_df(query)
         data[table] = df
     

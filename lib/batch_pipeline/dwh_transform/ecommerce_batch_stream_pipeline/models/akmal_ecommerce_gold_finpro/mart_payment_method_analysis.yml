@@ -8,26 +8,10 @@ models:
       Essential for Finance, Risk, and Product teams.
 
     columns:
-      - name: order_month
-        description: "First day of the month"
-        tests:
-          - not_null
-
-      - name: year
-      - name: month
-      - name: year_month
-        description: "Format: 2025-11"
-
       - name: payment_method
         description: "card, ewallet, bank_transfer, etc."
         tests:
           - not_null
-
-      - name: card_brand
-        description: "Visa, MasterCard, etc. (N/A if not card)"
-
-      - name: ewallet_provider
-        description: "GoPay, OVO, DANA, ShopeePay, etc. (N/A if not ewallet)"
 
       - name: total_orders
       - name: genuine_orders
@@ -38,17 +22,12 @@ models:
       - name: net_revenue
         description: "Revenue from GENUINE orders only → what actually lands in the bank"
 
-      - name: genuine_units
-
       - name: aov_genuine
         description: "Average order value of genuine transactions"
 
       - name: fraud_rate
         description: "Critical risk KPI per payment method"
       - name: genuine_rate
-
-      - name: revenue_share_of_total
-        description: "% of total monthly genuine revenue coming from this payment method"
 
     tests:
       - dbt_utils.expression_is_true:

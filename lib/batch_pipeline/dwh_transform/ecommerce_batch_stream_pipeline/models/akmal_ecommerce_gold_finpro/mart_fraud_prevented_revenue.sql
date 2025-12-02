@@ -36,8 +36,6 @@ SELECT
     
     SUM(amount_numeric)                                               AS total_saved_amount,
     AVG(amount_numeric)                                               AS avg_saved_per_fraud_order,
-    PERCENTILE_CONT(amount_numeric, 0.95) OVER (PARTITION BY order_month) 
-                                                                      AS p95_saved_amount,
     ROUND(SUM(amount_numeric), 0)                                     AS monthly_fraud_prevented_revenue,
 
     -- COUNT(DISTINCT CASE WHEN amount_numeric > 5000000 THEN order_id END) 
@@ -47,4 +45,3 @@ SELECT
 
 FROM fraud_orders
 GROUP BY ALL
-ORDER BY order_month DESC

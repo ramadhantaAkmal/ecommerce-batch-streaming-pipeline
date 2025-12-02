@@ -1,10 +1,10 @@
 {{ config(
     materialized = 'table',
     partition_by = {
-        "field": "order_month",
-        "data_type": "date"
+        "field": "product_id",
+        "data_type": "integer"
     },
-    cluster_by = ["category", "fraud_rate"],
+    cluster_by = ["category", "product_id"],
     alias = 'mart_fraud_by_product'
 ) }}
 
@@ -17,25 +17,13 @@ WITH fact AS (
         f.status,                  
         f.fraud_reasons,
         p.product_name,
-        p.category,
-        d.date      AS order_date,
-        d.year,
-        d.month,
-        DATE_TRUNC(d.date, MONTH) AS order_month
+        p.category
     FROM {{ source('akmal_ecommerce_silver_finpro','fact_order') }} f
     LEFT JOIN {{ source('akmal_ecommerce_silver_finpro','dim_products') }} p   
         ON f.product_id = p.product_id
-    LEFT JOIN {{ source('akmal_ecommerce_silver_finpro','dim_date') }} d      
-        ON f.date_id = d.date_id
 )
 
 SELECT
-    -- Time
-    order_month,
-    year,
-    month,
-    FORMAT_DATE('%Y-%m', order_month) AS year_month,
-
     -- Product
     product_id,
     product_name,
@@ -43,13 +31,8 @@ SELECT
 
     -- Core counts
     COUNT(DISTINCT order_id)                                          AS total_orders,
-
     COUNT(DISTINCT CASE WHEN status = 'genuine' THEN order_id END)    AS genuine_orders,
     COUNT(DISTINCT CASE WHEN status = 'frauds'   THEN order_id END)    AS fraud_orders,
-
-    -- Volume & revenue
-    SUM(amount_numeric)                                               AS gross_gmv,
-    SUM(CASE WHEN status = 'genuine' THEN amount_numeric ELSE 0 END) AS net_revenue,
 
     -- Key fraud metrics
     SAFE_DIVIDE(
@@ -68,6 +51,4 @@ SELECT
 
 FROM fact
 GROUP BY ALL
-HAVING total_orders >= 10   -- filter out noise: only products with meaningful volume
-   AND fraud_orders > 0
-ORDER BY fraud_orders DESC, fraud_rate DESC
+HAVING fraud_orders > 0

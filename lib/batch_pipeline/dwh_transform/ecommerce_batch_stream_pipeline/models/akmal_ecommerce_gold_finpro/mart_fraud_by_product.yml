@@ -8,15 +8,6 @@ models:
       Essential for Risk, Trust & Safety, and Merchandising teams.
 
     columns:
-      - name: order_month
-        description: "First day of the month"
-        tests:
-          - not_null
-
-      - name: year
-      - name: month
-      - name: year_month
-
       - name: product_id
         tests: [not_null]
       - name: product_name
@@ -28,9 +19,6 @@ models:
       - name: genuine_orders
       - name: fraud_orders
         description: "How many fraud attempts on this exact product"
-
-      - name: gross_gmv
-      - name: net_revenue
 
       - name: fraud_rate
         description: "Critical KPI: % of orders for this product that are fraudulent"

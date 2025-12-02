@@ -27,9 +27,6 @@ models:
       - name: avg_saved_per_fraud_order
         description: "Average size of blocked fraudulent transaction"
 
-      - name: p95_saved_amount
-        description: "95th percentile — shows the really big fraud attempts caught"
-
       - name: monthly_fraud_prevented_revenue
         description: "Final headline number: How much revenue the fraud system saved this month"
         tests:

@@ -45,9 +45,6 @@ models:
 
       - name: avg_items_per_genuine_order
 
-      - name: unique_genuine_customers
-        description: "Distinct customers who made at least one genuine purchase that day"
-
       - name: fraud_rate
         description: "fraud_orders / total_orders → key risk KPI"
 

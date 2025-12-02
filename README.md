@@ -42,7 +42,7 @@ The end result is transformed data stored in a data warehouse built on BigQuery 
       Orders --> Stream
       Stream --> FraudSys
       BatchHourly --> DB
-      DB -->|Fetch Random\nProduct & User Id| Orders
+      DB -->|Fetch Random Product & User Id| Orders
       FraudSys --> |Detect genuine or fraud orders| DB
       DB --> BatchDaily
       BatchDaily --> DWHBronze

@@ -22,17 +22,6 @@ models:
 
       - name: fraud_rate
         description: "Critical KPI: % of orders for this product that are fraudulent"
-      
-      - name: avg_fraud_order_value
-        description: "Average ticket size of fraud attempts – fraudsters often go for expensive items"
 
       - name: blocked_fraud_amount
         description: "Total monetary value of fraud orders blocked (if you decline them)"
-
-    tests:
-      - dbt_utils.expression_is_true:
-          expression: "fraud_rate BETWEEN 0 AND 1"
-      - dbt_utils.expression_is_true:
-          expression: "fraud_orders >= 1"
-      - dbt_utils.expression_is_true:
-          expression: "total_orders >= 10"

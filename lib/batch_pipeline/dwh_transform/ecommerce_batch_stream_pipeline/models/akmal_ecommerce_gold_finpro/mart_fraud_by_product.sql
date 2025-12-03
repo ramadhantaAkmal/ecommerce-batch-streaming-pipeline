@@ -24,30 +24,17 @@ WITH fact AS (
 )
 
 SELECT
-    -- Product
     product_id,
     product_name,
     category,
-
-    -- Core counts
-    COUNT(DISTINCT order_id)                                          AS total_orders,
-    COUNT(DISTINCT CASE WHEN status = 'genuine' THEN order_id END)    AS genuine_orders,
-    COUNT(DISTINCT CASE WHEN status = 'frauds'   THEN order_id END)    AS fraud_orders,
-
-    -- Key fraud metrics
+    COUNT(DISTINCT order_id) AS total_orders,
+    COUNT(DISTINCT CASE WHEN status = 'genuine' THEN order_id END) AS genuine_orders,
+    COUNT(DISTINCT CASE WHEN status = 'frauds'   THEN order_id END) AS fraud_orders,
     SAFE_DIVIDE(
         COUNT(DISTINCT CASE WHEN status = 'frauds' THEN order_id END),
         COUNT(DISTINCT order_id)
-    )                                                                 AS fraud_rate,
-
-    -- Average ticket size of fraud attempts
-    SAFE_DIVIDE(
-        SUM(CASE WHEN status = 'frauds' THEN amount_numeric ELSE 0 END),
-        COUNT(DISTINCT CASE WHEN status = 'frauds' THEN order_id END)
-    )                                                                 AS avg_fraud_order_value,
-
-    -- Total fraud loss prevented 
-    SUM(CASE WHEN status = 'frauds' THEN amount_numeric ELSE 0 END)   AS blocked_fraud_amount
+    ) AS fraud_rate,
+    SUM(CASE WHEN status = 'frauds' THEN amount_numeric ELSE 0 END) AS blocked_fraud_amount
 
 FROM fact
 GROUP BY ALL

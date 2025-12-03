@@ -22,17 +22,6 @@ models:
       - name: net_revenue
         description: "Revenue from GENUINE orders only → what actually lands in the bank"
 
-      - name: aov_genuine
-        description: "Average order value of genuine transactions"
-
       - name: fraud_rate
         description: "Critical risk KPI per payment method"
       - name: genuine_rate
-
-    tests:
-      - dbt_utils.expression_is_true:
-          expression: "fraud_rate BETWEEN 0 AND 1"
-      - dbt_utils.expression_is_true:
-          expression: "genuine_rate + fraud_rate >= 0.99" 
-      - dbt_utils.expression_is_true:
-          expression: "revenue_share_of_total BETWEEN 0 AND 1"

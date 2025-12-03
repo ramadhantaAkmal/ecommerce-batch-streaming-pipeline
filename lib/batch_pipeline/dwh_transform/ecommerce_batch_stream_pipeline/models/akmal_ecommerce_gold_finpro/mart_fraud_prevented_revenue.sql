@@ -25,23 +25,15 @@ WITH fraud_orders AS (
 )
 
 SELECT
-    -- Time
     order_month,
     year,
     month,
     FORMAT_DATE('%Y-%m', order_month) AS year_month,
 
-    -- Fraud prevention KPIs
     COUNT(DISTINCT order_id)                                          AS blocked_fraud_orders,
-    
     SUM(amount_numeric)                                               AS total_saved_amount,
     AVG(amount_numeric)                                               AS avg_saved_per_fraud_order,
     ROUND(SUM(amount_numeric), 0)                                     AS monthly_fraud_prevented_revenue,
-
-    -- COUNT(DISTINCT CASE WHEN amount_numeric > 5000000 THEN order_id END) 
-    --     AS high_value_fraud_blocked,
-    -- SUM(CASE WHEN country_code NOT IN ('ID') THEN amount_numeric ELSE 0 END)
-    --     AS saved_from_international_fraud
 
 FROM fraud_orders
 GROUP BY ALL

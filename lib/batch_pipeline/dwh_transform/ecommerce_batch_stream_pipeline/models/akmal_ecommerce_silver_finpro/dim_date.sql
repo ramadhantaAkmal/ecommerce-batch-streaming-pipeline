@@ -1,6 +1,5 @@
 {{ config(
     materialized='table',
-    description='Date dimension table for orders in the Star Schema',
 ) }}
 
 SELECT

@@ -1,6 +1,5 @@
 {{ config(materialized='incremental', 
     unique_key='order_id',
-    description='Fact table for sales data in the Star Schema, partitioned by date',
     partition_by={
         "field": "DATE(last_updated)",
         "data_type": "date",
@@ -32,11 +31,15 @@ WITH orders_raw AS (
         o.created_at as last_updated
 
     FROM orders_raw o
-    LEFT JOIN {{ ref('dim_users') }} c        ON o.user_id = c.user_id 
-    LEFT JOIN {{ ref('dim_products') }} p         ON o.product_id = p.product_id
-    LEFT JOIN {{ ref('dim_date') }} d            ON DATE(o.created_at) = d.date
-    LEFT JOIN {{ ref('dim_payment_method') }} pm ON o.payment_method = pm.payment_method
-                                              AND COALESCE(o.card_brand, '') = COALESCE(pm.card_brand, '')
+    LEFT JOIN {{ ref('dim_users') }} c 
+        ON o.user_id = c.user_id 
+    LEFT JOIN {{ ref('dim_products') }} p
+        ON o.product_id = p.product_id
+    LEFT JOIN {{ ref('dim_date') }} d
+        ON DATE(o.created_at) = d.date
+    LEFT JOIN {{ ref('dim_payment_method') }} pm 
+        ON o.payment_method = pm.payment_method
+        AND COALESCE(o.card_brand, '') = COALESCE(pm.card_brand, '')
     {% if is_incremental() %}
     WHERE o.created_at > (SELECT MAX(last_updated) FROM {{ this }})
     {% endif %}

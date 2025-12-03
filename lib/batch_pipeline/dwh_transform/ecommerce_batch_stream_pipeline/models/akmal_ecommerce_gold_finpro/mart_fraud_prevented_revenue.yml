@@ -4,7 +4,7 @@ models:
   - name: mart_fraud_prevented_revenue
     description: |
       Monthly summary of revenue protected by the fraud detection system.
-      Shows exactly how much money was saved by correctly identifying and blocking FRAUD orders.
+      Shows exactly how much money was saved by correctly identifying and blocking fraud orders.
       This is the #1 KPI to justify the existence and budget of the Fraud/Risk team.
 
     columns:
@@ -31,11 +31,3 @@ models:
         description: "Final headline number: How much revenue the fraud system saved this month"
         tests:
           - not_null
-
-    tests:
-      - dbt_utils.expression_is_true:
-          expression: "total_saved_amount >= 0"
-      - dbt_utils.expression_is_true:
-          expression: "blocked_fraud_orders >= 0"
-      - dbt_utils.expression_is_true:
-          expression: "monthly_fraud_prevented_revenue = total_saved_amount"

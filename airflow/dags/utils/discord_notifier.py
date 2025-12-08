@@ -4,11 +4,14 @@ import time
 import json
 import datetime
 
-from airflow.models import TaskInstance, Variable
+from airflow.models import Variable
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 
 def send_with_retry(webhook, max_retries=2):
+    """
+        Handle rate limit error from discord
+    """
     for attempt in range(max_retries):
         response = webhook.execute()
 
@@ -34,7 +37,7 @@ def send_with_retry(webhook, max_retries=2):
     raise Exception("Discord webhook failed after retries")
 
 
-def send_alert_discord(context):
+def send_error_alert_discord(context):
     last_task = context.get('task_instance')
     task_name = last_task.task_id
     dag_name = last_task.dag_id
@@ -55,7 +58,7 @@ def send_alert_discord(context):
     webhook = DiscordWebhook(url=Variable.get("discord_webhook"))
     embed = DiscordEmbed(
         title="Airflow Alert - Task has failed!",
-        color='CC0000',
+        color=0xCC0000,
         url=log_link,
         timestamp=execution_date
     )
@@ -65,7 +68,7 @@ def send_alert_discord(context):
     embed.add_embed_field(name="TASK", value=task_name, inline=False)
     safe_error = (error_message or "No error message").strip()
 
-    # Discord max embed field value = 1024 chars
+    # limit the error message length
     if len(safe_error) > 1020:
         safe_error = safe_error[:1020] + "..."
 
@@ -75,9 +78,46 @@ def send_alert_discord(context):
         inline=False
     )
 
-
     webhook.add_embed(embed)
 
     response = send_with_retry(webhook)
+
+    return response
+
+
+def send_success_alert_discord(context):
+    last_task = context.get('task_instance')
+    task_name = last_task.task_id
+    dag_name = last_task.dag_id
+    execution_date = str(context.get('logical_date'))
+
+    webhook = DiscordWebhook(url=Variable.get("discord_webhook"))
+    embed = DiscordEmbed(
+        title="DAG Run Succeeded!",
+        description=f"**{dag_name}** completed successfully",
+        color=0x00ff00,
+        timestamp=execution_date
+    )
+
+    embed.set_author(
+        name="Apache Airflow",
+        url="https://airflow.apache.org",
+        icon_url="https://airflow.apache.org/docs/apache-airflow/stable/favicon.png"
+    )
+    embed.add_embed_field(name="DAG", value=dag_name, inline=True)
+    embed.add_embed_field(name="TASK", value=task_name, inline=False)
+    
+    airflow_webserver = Variable.get("airflow_webserver_url", "http://localhost:8080")
+    dag_run_url = f"{airflow_webserver}/dags/{dag_name}/grid?dag_run_id={context['dag_run'].run_id}"
+    embed.add_embed_field(name="View in Airflow", value=f"[Open DAG Run]({dag_run_url})", inline=False)
+
+    webhook.add_embed(embed)
+
+    # Small delay to avoid rate limits
+    time.sleep(1)
+    response = webhook.execute()
+
+    if response.status_code != 204:
+        raise ValueError(f"Discord webhook failed: {response.status_code} - {response.text}")
 
     return response

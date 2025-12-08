@@ -10,7 +10,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from pendulum import duration
 from lib.batch_pipeline.user_generator import generate_users
-from utils.discord_notifier import send_alert_discord
+from utils.discord_notifier import send_error_alert_discord,send_success_alert_discord
 
 with DAG(
     dag_id='user_generator',
@@ -19,11 +19,11 @@ with DAG(
     catchup=True,
     description='user data generator and load to postgres db',
     tags=['data-loader','hourly'],
-    on_failure_callback=send_alert_discord
+    on_failure_callback=send_error_alert_discord,
+    on_success_callback=send_success_alert_discord
 )as dag:
     generate_user_task = PythonOperator(
         task_id='load_user',
         python_callable=generate_users,
         op_kwargs={'ts': '{{ ts }}'},
-        on_failure_callback=send_alert_discord
     )

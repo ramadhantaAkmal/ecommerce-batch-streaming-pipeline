@@ -27,7 +27,7 @@ def is_fraud(order):
     if payment["method"] in ["credit_card", "debit_card"] and payment["card_country"] != "ID" and country == "ID":
         reasons.append("foreign_card_in_id")
 
-    # Rule 3: Quantity besar (>100) dan amount lebih dari 100jt
+    # Rule 3: Quantity besar (>5) dan amount lebih dari 100jt
     if qty > 5 and amount > 100_000_000:
         reasons.append("high_qty_on_exp_products")
 
